@@ -29,7 +29,6 @@ class Connection():
 
 
 def init_tables():
-
     with Connection() as db:
         db.c.execute("DROP TABLE IF EXISTS messages")
         # content: message body, i.e. "Hello everyone!"
@@ -40,9 +39,9 @@ def init_tables():
             content TEXT,
             poster INT,
             post_time TEXT,
-            id INT
+            id INT  -- Unique message ID
         )""")
-        log_output(f"Successfully created Message Table at {os.path.abspath(DB_PATH)}")
+        log(f"Successfully created Message Table at {os.path.abspath(DB_PATH)}")
 
         db.c.execute("DROP TABLE IF EXISTS users")
         # NOTE: Will expand on this later, but just need to get the ball rolling
@@ -51,7 +50,7 @@ def init_tables():
             username TEXT,
             password TEXT
         )""")
-        log_output(f"Successfully created User Table at {os.path.abspath(DB_PATH)}")
+    log(f"Successfully created User Table at {os.path.abspath(DB_PATH)}")
 
 
 def fetch_message(id):
@@ -60,22 +59,35 @@ def fetch_message(id):
         message = db.c.fetchall()[0]
     return message
 
-def create_post():
+def create_post(content):
     with Connection() as db:
         db.c.execute("""INSERT INTO messages(
-        
-        ) VALUES""")
+            content,
+            poster,
+            post_time,
+            id                        -- Some of the values are None as of now
+        ) VALUES (?, ?, ?, ?)""", [content, None, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 0])
+    log(f"Successfully added message {None} to database at {os.path.abspath(DB_PATH)}")
 
 
-def log_output(status):
+# Function for testing, messing around, whatever really.
+def whatever():
+    with Connection() as db:
+        pass
+
+
+# Outputs actions done by the database interface to a text file
+# Example: "[28/03/2023]: Successfully initialised databases to <path to database>"
+def log(status):
     with open("../db.log", "a") as f:
         current_time = datetime.datetime.now()
-        current_time = current_time.strftime("%d/%m/%Y %H:%M:%S")
+        current_time = current_time.strftime("%d/%m/%Y %H:%M:%S") # Formaterer informasjonen fra datetime
         f.write(f"[{current_time}]: {status}\n")        
 
 
 def main():
-    init_tables()
+    # init_tables()
+    create_post("Hello World!")
 
 
 if __name__ == "__main__":
