@@ -7,6 +7,7 @@ DB_PATH = "../forum.db"
 
 
 class Connection():
+    # Context manager which makes code more readable and safer to execute
     def __init__(self):
         self.conn = sqlite3.connect(DB_PATH)
         self.c = self.conn.cursor()
@@ -28,6 +29,7 @@ class Connection():
 
 
 def init_tables():
+
     with Connection() as db:
         db.c.execute("DROP TABLE IF EXISTS messages")
         # content: message body, i.e. "Hello everyone!"
@@ -55,22 +57,26 @@ def init_tables():
 def fetch_message(id):
     with Connection() as db:
         db.c.execute("SELECT * FROM messages WHERE id = ?", [id])
-        messages = db.c.fetchall()
+        message = db.c.fetchall()[0]
+    return message
 
 def create_post():
     with Connection() as db:
-        db.c.execute("""INSERT INTO messages VALUES""")
+        db.c.execute("""INSERT INTO messages(
+        
+        ) VALUES""")
 
 
-def log_output(text):
+def log_output(status):
     with open("../db.log", "a") as f:
         current_time = datetime.datetime.now()
         current_time = current_time.strftime("%d/%m/%Y %H:%M:%S")
-        f.write(f"[{current_time}]: {text}\n")        
+        f.write(f"[{current_time}]: {status}\n")        
 
 
 def main():
     init_tables()
+
 
 if __name__ == "__main__":
     main()
