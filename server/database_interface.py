@@ -1,9 +1,11 @@
 import sqlite3
 import os
 import datetime
+import random
 
 
 DB_PATH = "../forum.db"
+DB_PATH_ABSOLUTE = os.path.abspath(DB_PATH)
 
 
 class Connection():
@@ -41,16 +43,49 @@ def init_tables():
             post_time TEXT,
             id INT  -- Unique message ID
         )""")
-        log(f"Successfully created Message Table at {os.path.abspath(DB_PATH)}")
+        log(f"Successfully created Message Table at {DB_PATH_ABSOLUTE}")
 
         db.c.execute("DROP TABLE IF EXISTS users")
         # NOTE: Will expand on this later, but just need to get the ball rolling
         db.c.execute("""CREATE TABLE users (
             user_id INT,
             username TEXT,
-            password TEXT
+            password TEXT  -- Passwords will NOT be stored as plaintext on release, will be hashed
         )""")
-    log(f"Successfully created User Table at {os.path.abspath(DB_PATH)}")
+        log(f"Successfully created User Table at {DB_PATH_ABSOLUTE}")
+
+
+def create_user(userinfo: list):
+    global CURRENT_USER
+    username = userinfo[0]
+    password = userinfo[1]
+    id = create_id()
+    with Connection() as db:
+        db.c.execute("""INSERT INTO users(
+            user_id,
+            username,
+            password
+        ) VALUES (?, ?, ?)""", [id, username, password])
+    log(f"Successfully created user {id} at {DB_PATH_ABSOLUTE}")
+    CURRENT_USER = id
+
+
+def get_user(id):
+    with Connection() as db:
+        db.c.execute("SELECT * FROM users WHERE id = ?", [id])
+        user = db.c.fetchall()[0]
+    return user
+
+
+def create_post(content: str, user: int):
+    with Connection() as db:
+        db.c.execute("""INSERT INTO messages(
+            content,
+            poster,
+            post_time,
+            id                        -- Some of the values are None as of now
+        ) VALUES (?, ?, ?, ?)""", [content, user, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 0])
+    log(f"Successfully added message {0} to database at {DB_PATH_ABSOLUTE}")
 
 
 def fetch_message(id):
@@ -59,15 +94,18 @@ def fetch_message(id):
         message = db.c.fetchall()[0]
     return message
 
-def create_post(content):
-    with Connection() as db:
-        db.c.execute("""INSERT INTO messages(
-            content,
-            poster,
-            post_time,
-            id                        -- Some of the values are None as of now
-        ) VALUES (?, ?, ?, ?)""", [content, None, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 0])
-    log(f"Successfully added message {None} to database at {os.path.abspath(DB_PATH)}")
+
+# Function which creates an ID for a user or a post
+def create_id(*post: bool) -> int:
+    if post:
+        return 0
+    baseline = datetime.datetime.today().strftime("%Y%m%d%f")
+    month = datetime.datetime.today().strftime("%m")
+    ms = datetime.datetime.now().strftime("%f")
+    random.seed = int(month) * int(ms)
+    randomness = str(random.randint(1000, 9999))
+
+    return(int(baseline + randomness))
 
 
 # Function for testing, messing around, whatever really.
@@ -75,6 +113,11 @@ def whatever():
     with Connection() as db:
         pass
 
+
+def test_database():
+    init_tables()
+    create_user(["Test", "password123"])
+    create_post("Hello World!", CURRENT_USER)
 
 # Outputs actions done by the database interface to a text file
 # Example: "[28/03/2023]: Successfully initialised databases to <path to database>"
@@ -86,8 +129,9 @@ def log(status):
 
 
 def main():
-    # init_tables()
-    create_post("Hello World!")
+    test_database()
+    print(fetch_message(0))
+    print("Code Executed Successfully")
 
 
 if __name__ == "__main__":
