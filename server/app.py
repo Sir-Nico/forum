@@ -13,7 +13,6 @@ import database_interface as dbInterface
 from database_interface import log, Connection
 
 
-
 app = Flask(__name__, static_url_path='', static_folder='../client/build')
 CORS(app)
 
@@ -23,3 +22,11 @@ def serve(path):
         return send_from_directory(app.static_folder, path)
     else:
         return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/')
+def defaultPage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
