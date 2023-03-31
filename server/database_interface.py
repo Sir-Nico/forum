@@ -44,7 +44,7 @@ def init_tables():
             post_time TEXT,
             id INT  -- Unique message ID
         )""")
-        log(f"Successfully created Message Table at {DB_PATH_ABSOLUTE}")
+        log(f"Created Message Table at {DB_PATH_ABSOLUTE}")
 
         db.c.execute("DROP TABLE IF EXISTS users")
         # NOTE: Will expand on this later, but just need to get the ball rolling
@@ -54,7 +54,7 @@ def init_tables():
             password TEXT,  -- Password will be hashed in the flask app
             posted_msgs INT
         )""")
-        log(f"Successfully created User Table at {DB_PATH_ABSOLUTE}")
+        log(f"Created User Table at {DB_PATH_ABSOLUTE}")
 
 
 def create_user(userinfo: list):
@@ -69,7 +69,7 @@ def create_user(userinfo: list):
             password,
             posted_msgs
         ) VALUES (?, ?, ?, 0)""", [id, username, password])
-    log(f"Successfully created user {id} at {DB_PATH_ABSOLUTE}")
+    log(f"Created user {id} at {DB_PATH_ABSOLUTE}")
     CURRENT_USER = id  # A Variable for testing user functions within this file
 
 
@@ -85,9 +85,8 @@ def create_post(content: str, user: int):
         log(f"ERROR: Could not create message: Not Logged in")
         return False
     with Connection() as db:
-        print(get_user(CURRENT_USER)[3])
         db.c.execute("UPDATE users SET posted_msgs = ? WHERE user_id = ?", [get_user(CURRENT_USER)[3] + 1, CURRENT_USER])
-        print(get_user(CURRENT_USER)[3])
+    with Connection() as db:
         id = create_id(True)
         db.c.execute("""INSERT INTO messages(
             content,
@@ -95,8 +94,8 @@ def create_post(content: str, user: int):
             post_time,
             id
         ) VALUES (?, ?, ?, ?)""", [content, user, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), id])
-    log(f"Successfully added message {id} to database at {DB_PATH_ABSOLUTE}")
-    log(f"Successfully updated user {CURRENT_USER} at {DB_PATH_ABSOLUTE}")
+    log(f"Added message {id} to database at {DB_PATH_ABSOLUTE}")
+    log(f"Updated user {CURRENT_USER} at {DB_PATH_ABSOLUTE}")
 
 
 def fetch_message(id):
@@ -110,7 +109,8 @@ def fetch_message(id):
 def create_id(*post: bool) -> int:
     if post:
         baseline = str(CURRENT_USER)
-        return int(baseline) + 0
+        extra = str(get_user(CURRENT_USER)[3])
+        return int(baseline + extra)
     baseline = datetime.datetime.today().strftime("%Y%m%d%f")
     hour = datetime.datetime.today().strftime("%H%M")
     ms = datetime.datetime.now().strftime("%f")
@@ -133,17 +133,24 @@ def test_database():
     create_post("Hello World!", CURRENT_USER)
 
 # Outputs actions done by the database interface to a text file
-# Example: "[28/03/2023]: Successfully initialised databases to <path to database>"
+# Example: "[28/03/2023]: Initialised databases to <path to database>"
 def log(status):
     with open("../db.log", "a") as f:
         current_time = datetime.datetime.now()
         current_time = current_time.strftime("%d/%m/%Y %H:%M:%S") # Formaterer informasjonen fra datetime
-        f.write(f"[{current_time}]: {status}\n")        
+        f.write(f"[{current_time}]: {status}\n")
+
+
+# Clears the log file by opening it in write mode, overwriting everything present.
+def clear_log():
+    with open("../db.log", "w") as f:
+        pass
 
 
 def main():
+    clear_log()
     test_database()
-    print(fetch_message(int(str(CURRENT_USER) + str(get_user(CURRENT_USER)[3] - 1))))
+    print(fetch_message(int(str(CURRENT_USER) + str(get_user(CURRENT_USER)[3]))))
     print("Code Executed Successfully")
 
 
