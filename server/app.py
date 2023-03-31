@@ -1,7 +1,6 @@
 import os
 import time
 import sqlite3
-from django.shortcuts import redirect
 from flask import Flask, jsonify, request, Response, send_from_directory, redirect
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -27,7 +26,7 @@ def defaultPage():
     print("Hello!!")
     return send_from_directory(app.static_folder, 'index.html')
 
-@app.route('/api', methods=["GET"])
+@app.route('/api', methods=["POST"])
 def api():
     return {"test": "balls"}
 

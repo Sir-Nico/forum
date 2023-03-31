@@ -120,6 +120,12 @@ def create_id(*post: bool) -> int:
     return int(baseline + randomness)
 
 
+def get_messages():
+    with Connection() as db:
+        db.c.execute("SELECT content FROM messages")
+        print(db.c.fetchall())
+
+
 # Function for testing, messing around, whatever really.
 def temp():
     with Connection() as db:
@@ -128,9 +134,15 @@ def temp():
 
 # Test function for the database. You end up with a template database.
 def test_database():
-    init_tables()
-    create_user(["Test", "password123"])
+    #init_tables()
+    #create_user(["Test", "password123"])
     create_post("Hello World!", CURRENT_USER)
+    create_post("Hello World!", CURRENT_USER)
+    create_post("Hello World!", CURRENT_USER)
+    create_post("Hello World!", CURRENT_USER)
+    create_post("Hello World!", CURRENT_USER)
+    create_post("Hello World!", CURRENT_USER)
+    get_messages()
 
 # Outputs actions done by the database interface to a text file
 # Example: "[28/03/2023]: Initialised databases to <path to database>"
@@ -148,9 +160,7 @@ def clear_log():
 
 
 def main():
-    clear_log()
     test_database()
-    print(fetch_message(int(str(CURRENT_USER) + str(get_user(CURRENT_USER)[3]))))
     print("Code Executed Successfully")
 
 
