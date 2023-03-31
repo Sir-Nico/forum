@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, JWTManager
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-
 import database_interface as dbInterface
 from database_interface import log, Connection
 
@@ -25,7 +24,12 @@ def serve(path):
 
 @app.route('/')
 def defaultPage():
+    print("Hello!!")
     return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/api', methods=["GET"])
+def api():
+    return {"test": "balls"}
 
 
 if __name__ == "__main__":

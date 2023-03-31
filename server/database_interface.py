@@ -6,6 +6,7 @@ import random
 
 DB_PATH = "../forum.db"
 DB_PATH_ABSOLUTE = os.path.abspath(DB_PATH)
+CURRENT_USER = False
 
 
 class Connection():
@@ -50,7 +51,8 @@ def init_tables():
         db.c.execute("""CREATE TABLE users (
             user_id INT,
             username TEXT,
-            password TEXT  -- Passwords will NOT be stored as plaintext on release, will be hashed
+            password TEXT,  -- Password will be hashed in the flask app
+            posted_msgs INT
         )""")
         log(f"Successfully created User Table at {DB_PATH_ABSOLUTE}")
 
@@ -64,28 +66,37 @@ def create_user(userinfo: list):
         db.c.execute("""INSERT INTO users(
             user_id,
             username,
-            password
-        ) VALUES (?, ?, ?)""", [id, username, password])
+            password,
+            posted_msgs
+        ) VALUES (?, ?, ?, 0)""", [id, username, password])
     log(f"Successfully created user {id} at {DB_PATH_ABSOLUTE}")
-    CURRENT_USER = id
+    CURRENT_USER = id  # A Variable for testing user functions within this file
 
 
 def get_user(id):
     with Connection() as db:
-        db.c.execute("SELECT * FROM users WHERE id = ?", [id])
+        db.c.execute("SELECT * FROM users WHERE user_id = ?", [id])
         user = db.c.fetchall()[0]
     return user
 
 
 def create_post(content: str, user: int):
+    if not CURRENT_USER:
+        log(f"ERROR: Could not create message: Not Logged in")
+        return False
     with Connection() as db:
+        print(get_user(CURRENT_USER)[3])
+        db.c.execute("UPDATE users SET posted_msgs = ? WHERE user_id = ?", [get_user(CURRENT_USER)[3] + 1, CURRENT_USER])
+        print(get_user(CURRENT_USER)[3])
+        id = create_id(True)
         db.c.execute("""INSERT INTO messages(
             content,
             poster,
             post_time,
-            id                        -- Some of the values are None as of now
-        ) VALUES (?, ?, ?, ?)""", [content, user, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 0])
-    log(f"Successfully added message {0} to database at {DB_PATH_ABSOLUTE}")
+            id
+        ) VALUES (?, ?, ?, ?)""", [content, user, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), id])
+    log(f"Successfully added message {id} to database at {DB_PATH_ABSOLUTE}")
+    log(f"Successfully updated user {CURRENT_USER} at {DB_PATH_ABSOLUTE}")
 
 
 def fetch_message(id):
@@ -98,22 +109,24 @@ def fetch_message(id):
 # Function which creates an ID for a user or a post
 def create_id(*post: bool) -> int:
     if post:
-        return 0
+        baseline = str(CURRENT_USER)
+        return int(baseline) + 0
     baseline = datetime.datetime.today().strftime("%Y%m%d%f")
-    month = datetime.datetime.today().strftime("%m")
+    hour = datetime.datetime.today().strftime("%H%M")
     ms = datetime.datetime.now().strftime("%f")
-    random.seed = int(month) * int(ms)
+    random.seed = int(hour) * int(ms)
     randomness = str(random.randint(1000, 9999))
 
-    return(int(baseline + randomness))
+    return int(baseline + randomness)
 
 
 # Function for testing, messing around, whatever really.
-def whatever():
+def temp():
     with Connection() as db:
         pass
 
 
+# Test function for the database. You end up with a template database.
 def test_database():
     init_tables()
     create_user(["Test", "password123"])
@@ -130,7 +143,7 @@ def log(status):
 
 def main():
     test_database()
-    print(fetch_message(0))
+    print(fetch_message(int(str(CURRENT_USER) + str(get_user(CURRENT_USER)[3] - 1))))
     print("Code Executed Successfully")
 
 
