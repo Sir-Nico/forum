@@ -21,14 +21,22 @@ def serve(path):
     else:
         return send_from_directory(app.static_folder, 'index.html')
 
+
 @app.route('/')
 def defaultPage():
     print("Hello!!")
     return send_from_directory(app.static_folder, 'index.html')
 
+
 @app.route('/api', methods=["POST"])
 def api():
     return {"test": "balls"}
+
+
+@app.route('/api/get/messages/', methods=['GET'])
+def fetch_messages():
+    message_contents = dbInterface.get_messages_all()
+    return {'messages': message_contents}
 
 
 if __name__ == "__main__":

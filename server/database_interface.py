@@ -98,7 +98,7 @@ def create_post(content: str, user: int):
     log(f"Updated user {CURRENT_USER} at {DB_PATH_ABSOLUTE}")
 
 
-def fetch_message(id):
+def fetch_message(id: int):
     with Connection() as db:
         db.c.execute("SELECT * FROM messages WHERE id = ?", [id])
         message = db.c.fetchall()[0]
@@ -120,10 +120,13 @@ def create_id(*post: bool) -> int:
     return int(baseline + randomness)
 
 
-def get_messages():
+def get_messages_all() -> list:
     with Connection() as db:
+        msglist = []
         db.c.execute("SELECT content FROM messages")
-        print(db.c.fetchall())
+        for msg in db.c.fetchall():
+            msglist.append(msg[0])
+        return msglist[::-1]
 
 
 # Function for testing, messing around, whatever really.
@@ -134,29 +137,32 @@ def temp():
 
 # Test function for the database. You end up with a template database.
 def test_database():
-    #init_tables()
-    #create_user(["Test", "password123"])
-    create_post("Hello World!", CURRENT_USER)
-    create_post("Hello World!", CURRENT_USER)
-    create_post("Hello World!", CURRENT_USER)
-    create_post("Hello World!", CURRENT_USER)
-    create_post("Hello World!", CURRENT_USER)
-    create_post("Hello World!", CURRENT_USER)
-    get_messages()
+    # init_tables()
+    create_user(["Test", "password123"])
+    create_post("i put", CURRENT_USER)
+    create_post("the new forgis", CURRENT_USER)
+    create_post("on the jeep", CURRENT_USER)
+    create_post("i trap until", CURRENT_USER)
+    create_post("the bloody bottoms", CURRENT_USER)
+    create_post("is underneath", CURRENT_USER)
+    print(get_messages_all())
 
 # Outputs actions done by the database interface to a text file
 # Example: "[28/03/2023]: Initialised databases to <path to database>"
 def log(status):
-    with open("../db.log", "a") as f:
+    with open("../db.log", "r") as f:
+        old = f.read()  # Gets old contents of the file
+    with open("../db.log", "w") as f:
         current_time = datetime.datetime.now()
-        current_time = current_time.strftime("%d/%m/%Y %H:%M:%S") # Formaterer informasjonen fra datetime
+        current_time = current_time.strftime("%d/%m/%Y %H:%M:%S")  # Formats datetime info
         f.write(f"[{current_time}]: {status}\n")
+        f.write(old)  # Writes the old logs after the newest, so that the file is prepended with the new information
 
 
 # Clears the log file by opening it in write mode, overwriting everything present.
 def clear_log():
     with open("../db.log", "w") as f:
-        pass
+        pass  # Wipes the file, and then does nothing
 
 
 def main():
