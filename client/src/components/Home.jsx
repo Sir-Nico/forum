@@ -36,9 +36,9 @@ export default function Home() {
 
 
     return (
-        <div className="h-full">
+        <div className="h-full z-0">
             <div className="flex justify-center">
-                <span className="text-xl font-bold py-5">MEGAEPISK NETTSIDE</span>
+                <span className="text-xl font-bold py-5">Det kommer til å se bedre ut jeg lover</span>
             </div>
             <div className="flex justify-center">
                 <button onClick={TestDatabase} className="px-2 py-1 bg-gray-200 border border-gray-300 rounded-xl hover:bg-gray-300">API test</button>

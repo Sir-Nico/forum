@@ -9,8 +9,8 @@ export const HomePage = () => {
     return (
         <div>
             <Header/>
-            {/* <SideNav/> */}
             <Home/>
+            {/* <SideNav/> */}
         </div>
     )
 }
