@@ -33,7 +33,7 @@ def api():
     return {"test": "Hello from the backend!!"}
 
 
-@app.route('/api/get/messages/', methods=['GET'])
+@app.route('/api/get/messages/', methods=['GET', 'POST'])
 def fetch_messages():
     message_contents = dbInterface.get_messages_all()
     return {'messages': message_contents}
