@@ -30,7 +30,7 @@ def defaultPage():
 
 @app.route('/api', methods=["POST"])
 def api():
-    return {"test": "balls"}
+    return {"test": "Hello from the backend!!"}
 
 
 @app.route('/api/get/messages/', methods=['GET'])

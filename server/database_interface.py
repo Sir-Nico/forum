@@ -34,14 +34,10 @@ class Connection():
 def init_tables():
     with Connection() as db:
         db.c.execute("DROP TABLE IF EXISTS messages")
-        # content: message body, i.e. "Hello everyone!"
-        # poster: user ID of original poster
-        # post_time: Time message was posted
-        # id: message ID
         db.c.execute("""CREATE TABLE messages (
-            content TEXT,
-            poster INT,
-            post_time TEXT,
+            content TEXT, -- Message body, i.e. the actual content you have posted (NOTE: should be a BLOB later on)
+            poster INT, -- UID of Original Poster
+            post_time TEXT, -- Time of Posting
             id INT  -- Unique message ID
         )""")
         log(f"Created Message Table at {DB_PATH_ABSOLUTE}")
