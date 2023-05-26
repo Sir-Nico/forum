@@ -33,8 +33,8 @@ def api():
 
 @app.route('/api/get/messages/', methods=['GET', 'POST'])
 def fetch_messages():
-    message_contents = dbInterface.get_messages_all()
-    return {'messages': message_contents}
+    messages = dbInterface.get_messages_all()
+    return {'messages': messages}
 
 
 if __name__ == "__main__":

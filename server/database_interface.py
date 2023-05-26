@@ -77,7 +77,7 @@ def get_user(id):
 
 
 def create_post(content: str, user: int):
-    if not CURRENT_USER:
+    if user != CURRENT_USER:
         log(f"ERROR: Could not create message: Not Logged in")
         return False
     with Connection() as db:
@@ -119,29 +119,38 @@ def create_id(*post: bool) -> int:
 def get_messages_all() -> list:
     with Connection() as db:
         msglist = []
-        db.c.execute("SELECT content FROM messages")
-        for msg in db.c.fetchall():
-            msglist.append(msg[0])
+        db.c.execute("SELECT content, poster FROM messages")
+        messages = db.c.fetchall()
+        for msg in messages:
+            db.c.execute("SELECT username FROM users WHERE user_id = ?", [msg[1]])
+            user = db.c.fetchone()
+            msglist.append(f'{user[0]}: {msg[0]}')
         return msglist[::-1]
 
 
-# Function for testing, messing around, whatever really.
-def temp():
+def delete_message(id: int):
     with Connection() as db:
-        pass
+        db.c.execute("DELETE * FROM messages WHERE id = ?", [id])
+    log(f"Deleted Message {id} at {DB_PATH_ABSOLUTE}")
+
+
+# Function for testing, messing around, whatever really.
+def temp(content):
+    create_user(["SimTest", "bigpassword3"])
+    create_post(content, CURRENT_USER)
 
 
 # Test function for the database. You end up with a template database.
 def test_database():
     # init_tables()
     create_user(["Test", "password123"])
-    create_post("i put", CURRENT_USER)
-    create_post("the new forgis", CURRENT_USER)
-    create_post("on the jeep", CURRENT_USER)
-    create_post("i trap until", CURRENT_USER)
-    create_post("the bloody bottoms", CURRENT_USER)
-    create_post("is underneath", CURRENT_USER)
-    print(get_messages_all())
+    create_post("Første melding!", 1)
+    # create_post("En til melding?", CURRENT_USER)
+    # create_post("Meldinger overalt!", CURRENT_USER)
+    # create_post("Ok nå er det nok meldinger.", CURRENT_USER)
+    # create_post("Enda en melding", CURRENT_USER)
+    # create_post("Nyeste melding?", CURRENT_USER)
+
 
 # Outputs actions done by the database interface to a text file
 # Example: "[28/03/2023]: Initialised databases to <path to database>"
