@@ -143,17 +143,17 @@ def temp(content):
 # Test function for the database. You end up with a template database.
 def test_database():
     # init_tables()
-    create_user(["Test", "password123"])
+    create_user(["Test-o-tron 6000", "password123"])
     create_post("Første melding!", 1)
-    # create_post("En til melding?", CURRENT_USER)
-    # create_post("Meldinger overalt!", CURRENT_USER)
-    # create_post("Ok nå er det nok meldinger.", CURRENT_USER)
-    # create_post("Enda en melding", CURRENT_USER)
-    # create_post("Nyeste melding?", CURRENT_USER)
+    create_post("En til melding?", CURRENT_USER)
+    create_post("Meldinger overalt!", CURRENT_USER)
+    create_post("Ok nå er det nok meldinger.", CURRENT_USER)
+    create_post("Enda en melding", CURRENT_USER)
+    create_post("Nyeste melding?", CURRENT_USER)
 
 
 # Outputs actions done by the database interface to a text file
-# Example: "[28/03/2023]: Initialised databases to <path to database>"
+# Example: "[28/03/2023]: Initialised databases at <path to database>"
 def log(status):
     with open("../db.log", "r") as f:
         old = f.read()  # Gets old contents of the file

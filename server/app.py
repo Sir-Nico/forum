@@ -26,15 +26,23 @@ def defaultPage():
     return send_from_directory(app.static_folder, 'index.html')
 
 
-@app.route('/api', methods=['POST'])
+@app.route('/api', methods=['GET'])
 def api():
     return {"test": "Hello from the backend!!"}
 
 
-@app.route('/api/get/messages/', methods=['GET', 'POST'])
+@app.route('/api/get/messages/', methods=['GET'])
 def fetch_messages():
     messages = dbInterface.get_messages_all()
     return {'messages': messages}
+
+
+@app.route('/api/register', methods=['POST'])
+def register_user():
+    request_data = request.get_json()
+    print(request_data)
+    return {"test": "bruker"}
+
 
 
 if __name__ == "__main__":
