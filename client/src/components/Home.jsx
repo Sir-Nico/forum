@@ -9,15 +9,20 @@ export default function Home() {
             'method': 'GET',
             'headers': headers,
         }).then(function(response) {
-            console.log(response);
+            // console.log(response);
             response.json().then(function(json) {
-                const msgList = json.messages
+                const msgList = json.messages;
+                console.log(msgList);
+                document.getElementById('messageList').innerHTML = ''
+                for(let message in msgList) {
+                    document.getElementById('messageList').innerHTML += '<li>' + msgList[message] + '</li>';
+                };
             });
         });
     });
 
-    const TestDatabase = () => {
-        console.log("Clicked!");
+
+    const testDatabase = () => {
         const headers = new Headers();
         headers.append("Content-Type", "application/json");
         fetch("/api", {
@@ -27,7 +32,7 @@ export default function Home() {
                 "test": "test"
             })
         }).then(function(response) {
-            console.log(response);
+            // console.log(response);
             response.json().then(function(json) {
                 console.log(json);
             });
@@ -36,13 +41,14 @@ export default function Home() {
 
 
     return (
-        <div className="h-full z-0">
+        <div className="h-max w-full">
             <div className="flex justify-center">
                 <span className="text-xl font-bold py-5">Det kommer til å se bedre ut jeg lover</span>
             </div>
             <div className="flex justify-center">
-                <button onClick={TestDatabase} className="px-2 py-1 bg-gray-200 border border-gray-300 rounded-xl hover:bg-gray-300">API test</button>
+                <button onClick={testDatabase} className="px-2 py-1 bg-gray-200 border border-gray-300 rounded-xl hover:bg-gray-300">API test</button>
             </div>
+            <ul id='messageList' className='right-2/3'></ul>
         </div>
     );
 };

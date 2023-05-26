@@ -9,8 +9,10 @@ export const HomePage = () => {
     return (
         <div>
             <Header/>
-            <Home/>
-            {/* <SideNav/> */}
+            <div className="flex flex-row">
+                <SideNav/>
+                <Home/>
+            </div>
         </div>
     )
 }
