@@ -6,8 +6,6 @@ import random
 
 DB_PATH = "../forum.db"
 DB_PATH_ABSOLUTE = os.path.abspath(DB_PATH)
-CURRENT_USER = False
-
 
 class Connection():
     # Context manager which makes code more readable and safer to execute
@@ -47,7 +45,8 @@ def init_tables():
         db.c.execute("""CREATE TABLE users (
             user_id INT,
             username TEXT,
-            password TEXT,  -- Password will be hashed in the flask app
+            password TEXT,
+            salt TEXT,
             posted_msgs INT
         )""")
         log(f"Created User Table at {DB_PATH_ABSOLUTE}")
@@ -57,14 +56,19 @@ def create_user(userinfo: list):
     global CURRENT_USER
     username = userinfo[0]
     password = userinfo[1]
+    salt = userinfo[2]
+    if len(userinfo) != 3:
+        log("ERROR: Missing user parameter")
+        return
     id = create_id()
     with Connection() as db:
         db.c.execute("""INSERT INTO users(
             user_id,
             username,
             password,
+            salt,
             posted_msgs
-        ) VALUES (?, ?, ?, 0)""", [id, username, password])
+        ) VALUES (?, ?, ?, ?, 0)""", [id, username, password, salt])
     log(f"Created user {id} at {DB_PATH_ABSOLUTE}")
     CURRENT_USER = id  # A Variable for testing user functions within this file
 
@@ -81,7 +85,7 @@ def create_post(content: str, user: int):
         log(f"ERROR: Could not create message: Not Logged in")
         return False
     with Connection() as db:
-        db.c.execute("UPDATE users SET posted_msgs = ? WHERE user_id = ?", [get_user(CURRENT_USER)[3] + 1, CURRENT_USER])
+        db.c.execute("UPDATE users SET posted_msgs = ? WHERE user_id = ?", [get_user(CURRENT_USER)[4] + 1, CURRENT_USER])
     with Connection() as db:
         id = create_id(True)
         db.c.execute("""INSERT INTO messages(
@@ -105,7 +109,7 @@ def fetch_message(id: int):
 def create_id(*post: bool) -> int:
     if post:
         baseline = str(CURRENT_USER)
-        extra = str(get_user(CURRENT_USER)[3])
+        extra = str(get_user(CURRENT_USER)[4])
         return int(baseline + extra)
     baseline = datetime.datetime.today().strftime("%Y%m%d%f")
     hour = datetime.datetime.today().strftime("%H%M")
@@ -142,9 +146,9 @@ def temp(content):
 
 # Test function for the database. You end up with a template database.
 def test_database():
-    # init_tables()
-    create_user(["Test-o-tron 6000", "password123"])
-    create_post("Første melding!", 1)
+    init_tables()
+    create_user(["Test-o-tron 6000", "password123", "0"])
+    create_post("Første melding!", CURRENT_USER)
     create_post("En til melding?", CURRENT_USER)
     create_post("Meldinger overalt!", CURRENT_USER)
     create_post("Ok nå er det nok meldinger.", CURRENT_USER)

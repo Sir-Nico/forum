@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, JWTManager
 import database_interface as dbInterface
 from database_interface import log, Connection
+import secrets
+import hashlib
 
 
 app = Flask(__name__, static_url_path='', static_folder='../client/build')
@@ -26,7 +28,7 @@ def defaultPage():
     return send_from_directory(app.static_folder, 'index.html')
 
 
-@app.route('/api', methods=['GET'])
+@app.route('/api', methods=['GET', 'POST'])
 def api():
     return {"test": "Hello from the backend!!"}
 
@@ -40,10 +42,15 @@ def fetch_messages():
 @app.route('/api/register', methods=['POST'])
 def register_user():
     request_data = request.get_json()
-    print(request_data)
-    return {"test": "bruker"}
+    username, password = request_data.values()
+    salt = secrets.token_hex(16)
+    salty_password = password + salt
+    hash_password = hashlib.sha256(salty_password.encode("utf-8")).hexdigest()
+    
+    dbInterface.create_user([username, hash_password, salt])
+    dbInterface.create_post("Jeg lagde denne posten nettopp!", dbInterface.CURRENT_USER)
 
-
+    return {"test": "reg attempt"}
 
 if __name__ == "__main__":
     app.run(debug=True)

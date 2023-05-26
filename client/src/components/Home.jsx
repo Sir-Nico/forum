@@ -39,7 +39,7 @@ export default function Home() {
         });
     };
 
-    
+
     const createUser = () => {
         const data = {
             username: userRef.current.value,
@@ -63,7 +63,9 @@ export default function Home() {
                     "password": data.password
                 })
             }).then(function(response) {
-                console.log(response)
+                if (response.ok) {
+                    window.location.reload();
+                };
             })
         }
     };
