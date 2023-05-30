@@ -15,7 +15,6 @@ export default function Home() {
             // console.log(response);
             response.json().then(function(json) {
                 const msgList = json.messages;
-                console.log(msgList);
                 document.getElementById('messageList').innerHTML = ''
                 for (let message in msgList) {
                     document.getElementById('messageList').innerHTML += '<li>' + msgList[message] + '</li>';
@@ -66,8 +65,11 @@ export default function Home() {
                 if (response.ok) {
                     window.location.reload();
                 };
-            })
-        }
+                response.json().then(function(json) {
+                    document.getElementById("errorMessage").innerHTML = json.error;
+                });
+            });
+        };
     };
 
 
@@ -76,16 +78,18 @@ export default function Home() {
             <div className="flex justify-center">
                 <span className="text-xl font-bold py-5">Det kommer til å se bedre ut jeg lover</span>
             </div>
+            <div className="flex justify-center font-bold">Ikke logget inn</div>
+            <div className="flex justify-center">
+                <input id="nameInput" placeholder="Brukernavn" ref={userRef} className="bg-gray-100 rounded-lg border border-gray-350"></input>
+                <input id="passInput" ph="Passord" ref={passwordRef} type="password" className="bg-gray-100 rounded-lg border border-gray-350"></input>
+                <button onClick={createUser} className="px-2 py-1 bg-gray-200 border border-gray-300 rounded-xl hover:bg-gray-300 ml-1">reg test</button>
+            </div>
+            <div id="errorMessage" className="flex justify-center font-bold text-red-500 pb-5"></div>
             <div className="flex justify-center font-bold">
                 <span>Meldinger fra Databasen:</span>
             </div>
             <div className='flex justify-center pb-10'>
                 <ul id='messageList'></ul>
-            </div>
-            <div className="flex justify-center">
-                <input id="nameInput" placeholder="Brukernavn" ref={userRef} className="bg-gray-100 rounded-lg border border-gray-350"></input>
-                <input id="passInput" ph="Passord" ref={passwordRef} type="password" className="bg-gray-100 rounded-lg border border-gray-350"></input>
-                <button onClick={createUser} className="px-2 py-1 bg-gray-200 border border-gray-300 rounded-xl hover:bg-gray-300">reg test</button>
             </div>
         </div>
     );
